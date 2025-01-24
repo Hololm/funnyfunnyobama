@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Celebrity Generator</title>
+    <style>
+        .container {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .image-container {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 5px;
+        }
+        .caption {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p class="caption" id="caption"></p>
+        <div class="image-container">
+            <img id="generatedImage" src="" alt="Celebrity with Obama">
+        </div>
+        <div class="button-container">
+            <button onclick="generateImage()">Generate Image</button>
+            <button id="copyButton" onclick="copyImage()" style="display: none;">Copy Image</button>
+        </div>
+    </div>
+    <script>
+        async function generateImage() {
+            try {
+                const response = await fetch('http://localhost:5000/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+
+                const img = document.getElementById('generatedImage');
+                img.src = `http://localhost:5000/get_image?t=${new Date().getTime()}`;
+
+                document.getElementById('caption').textContent = data.caption;
+                document.getElementById('copyButton').style.display = 'inline';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate image');
+            }
+        }
+
+        async function copyImage() {
+            const img = document.getElementById('generatedImage');
+            try {
+                const blob = await fetch(img.src).then(r => r.blob());
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': blob
+                    })
+                ]);
+                alert('Image copied!');
+            } catch (err) {
+                console.error(err);
+                alert('Failed to copy image');
+            }
+        }
+    </script>
+</body>
+</html>
